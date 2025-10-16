@@ -1,15 +1,19 @@
 "use client"
+import { selectToken } from "@/redux/store";
 import { loginApi } from "@/services/api.service";
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
 
 const Login = () => {
+  const [email, setEmail] = useState("");
+  const token = useSelector(selectToken);
 
-const [email, setEmail] = useState("")
-const handleLogin = async (event: React.FormEvent) => {
-    event.preventDefault();
-    const response = await loginApi(email);
-    console.log("client", response)
-}
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await loginApi(email);
+  };
+
+
 
   return (
     <>
