@@ -108,3 +108,74 @@ export async function updateProductApi(id: string, data: any) {
     throw err;
   }
 }
+
+
+export async function deleteProductApi(id: string) {
+  try {
+    const token = store.getState().auth.token;
+    const res = await fetch(`https://api.bitechx.com/products/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to delete product. Status: ${res.status}`);
+    }
+
+    return await res.json(); // Expected { id: "12345" }
+  } catch (err) {
+    console.error("Error deleting product:", err);
+    throw err;
+  }
+}
+
+
+// get category id
+export async function categoryIdApi() {
+  try {
+    const token = store.getState().auth.token;
+
+    const res = await fetch("https://api.bitechx.com/products", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      
+    });
+
+    const result =  await res.json();
+    console.log("see cat result", result.category)
+    return result
+  } catch (err) {
+    console.error("Error creating product:", err);
+    throw err;
+  }
+}
+
+
+export async function AddProductApi(data: { name: string; description: string; price: number; categoryId: string; }) {
+  try {
+    const token = store.getState().auth.token;
+
+    const res = await fetch("https://api.bitechx.com/products", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+
+    const result =  await res.json();
+console.log("meem see result of adding", result)
+    return
+  } catch (err) {
+    console.error("Error creating product:", err);
+    throw err;
+  }
+}
+

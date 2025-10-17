@@ -11,11 +11,13 @@ import { MdDeleteOutline } from "react-icons/md";
 import DeleteModal from "@/components/modal/DeleteModal";
 import EditModal from "@/components/modal/EditModal";
 import { productType } from "@/types/types";
+import AddProduct from "@/components/modal/AddProduct";
 const Products = () => {
   const [allProducts, setAllProducts] = useState([]);
   const [products, setProducts] = useState<any[]>([]);
   const [isDelete, setIsDelete] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
+  const [isAdd, setIsAdd] = useState(false);
   const [offset, setOffset] = useState(0);
   const [singleProduct, setSingleProduct] = useState<productType | null>(null);
   const limit = 10;
@@ -75,6 +77,12 @@ const Products = () => {
     setSingleProduct(res);
   };
 
+  const handleDelete = async (slug: string) => {
+    setIsDelete(true);
+    const res = await singleProductApi(slug);
+    setSingleProduct(res);
+  };
+
   const handleUpdateProduct = (updated: productType) => {
     setProducts((prev) =>
       prev.map((p) =>
@@ -93,10 +101,23 @@ const Products = () => {
     setSingleProduct(updated);
     setIsEdit(false);
   };
+  const handleDeleteProduct = (deleted: any) => {
+    setProducts((prev) => prev.filter((p) => p.id !== deleted.id));
+  };
+
+  const handleAddProduct = (newProduct: any) => {
+    if (!newProduct) return;
+    setProducts((prev) => [newProduct, ...prev]); // add newly created product to list
+  };
 
   return (
     <>
-      <DeleteModal isOpen={isDelete} onClose={() => setIsDelete(false)} />
+      <DeleteModal
+        isOpen={isDelete}
+        onClose={() => setIsDelete(false)}
+        singleProduct={singleProduct}
+        onDeleted={handleDeleteProduct}
+      />
 
       <EditModal
         isOpen={isEdit}
@@ -105,24 +126,39 @@ const Products = () => {
         onUpdated={handleUpdateProduct}
       />
 
+      <AddProduct
+        isOpen={isAdd}
+        onClose={() => setIsAdd(false)}
+        onUpdated={handleAddProduct}
+      />
+
       <div className="flex flex-col items-center justify-center p-6 w-full">
         <h1 className="text-4xl font-bold text-gray-800 mb-6 text-center">
           Products List
         </h1>
 
-        {/* search input */}
-        <div className="search-box border border-[#dfe0e4] relative h-[45px] hidden lg:flex items-center rounded-full w-70 outline-none mb-6">
-          <input
-            type="text"
-            placeholder="Search"
-            className="h-full w-full ps-4 outline-none rounded-full"
-          />
-          <div className="absolute bg-[#006dca] right-0.5 p-3 rounded-full">
-            <MdSearch color="white" />
+        <div className="flex flex-row justify-between items-center w-full max-w-4xl mb-6">
+          {/* Add Product Button */}
+          <button
+            onClick={() => setIsAdd(true)}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg shadow transition-all"
+          >
+            + Add Product
+          </button>
+
+          {/* Search Box */}
+          <div className="relative w-64">
+            <input
+              type="text"
+              placeholder="Search products..."
+              className="w-full h-11 pl-4 pr-12 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+            />
+            <button className="absolute right-1.5 top-1.5 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full transition">
+              <MdSearch className="text-xl" />
+            </button>
           </div>
         </div>
-        {/* search input ends */}
-
+        {/* table starts */}
         <div className="relative overflow-x-auto w-full max-w-4xl mx-auto">
           <table className="w-full min-w-[600px] text-left table-auto text-gray-700 bg-white shadow-md rounded-lg bg-clip-border">
             <thead className="sticky top-0 bg-slate-50 z-10">
@@ -176,7 +212,7 @@ const Products = () => {
                       />
 
                       <MdDeleteOutline
-                        onClick={() => setIsDelete(true)}
+                        onClick={() => handleDelete(product.slug)}
                         className="cursor-pointer"
                         size={25}
                       />
@@ -187,7 +223,9 @@ const Products = () => {
             </tbody>
           </table>
         </div>
+        {/* table ends */}
 
+        {/* pagination starts */}
         <nav aria-label="Page navigation" className="mt-4">
           <ul className="flex items-center -space-x-px h-8 text-sm">
             <li>
@@ -262,6 +300,8 @@ const Products = () => {
             </li>
           </ul>
         </nav>
+
+        {/* pagination ends */}
       </div>
     </>
   );
