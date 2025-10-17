@@ -1,21 +1,23 @@
 "use client";
-import { productsApi, productsApiLength, singleProductApi } from "@/services/api.service";
+import {
+  productsApi,
+  productsApiLength,
+  singleProductApi,
+} from "@/services/api.service";
 import React, { useEffect, useState } from "react";
 import { MdSearch } from "react-icons/md";
 import { FaRegEdit } from "react-icons/fa";
 import { MdDeleteOutline } from "react-icons/md";
 import DeleteModal from "@/components/modal/DeleteModal";
 import EditModal from "@/components/modal/EditModal";
-import Image from "next/image";
-
+import { productType } from "@/types/types";
 const Products = () => {
   const [allProducts, setAllProducts] = useState([]);
   const [products, setProducts] = useState<any[]>([]);
   const [isDelete, setIsDelete] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [offset, setOffset] = useState(0);
-  const [singleProduct, setSingleProduct] = useState()
-  const [productSlug, setProductSlug] = useState<string>("")
+  const [singleProduct, setSingleProduct] = useState<productType | null>(null);
   const limit = 10;
 
   const getAllProductsLength = async () => {
@@ -33,7 +35,7 @@ const Products = () => {
 
   useEffect(() => {
     fetchAllProducts();
-  }, [offset]);
+  }, []);
 
   const totalPages = Math.ceil(allProducts.length / limit);
   const currentPage = Math.floor(offset / limit) + 1;
@@ -67,29 +69,41 @@ const Products = () => {
     return pages;
   };
 
-
-  const singleProductFetch = async () => {
-    const res = await singleProductApi(productSlug);
-    setSingleProduct(res);
-  }
-  const handleEdit = (slug: string) => {
+  const handleEdit = async (slug: string) => {
     setIsEdit(true);
-    setProductSlug(slug)
-    
-    
+    const res = await singleProductApi(slug);
+    setSingleProduct(res);
   };
 
+  const handleUpdateProduct = (updated: productType) => {
+    setProducts((prev) =>
+      prev.map((p) =>
+        p.id === updated.id
+          ? {
+              ...p,
+              name: updated.name,
+              price: updated.price,
+              description: updated.description,
+              slug: updated.slug,
+            }
+          : p
+      )
+    );
 
-  useEffect(() => {
-    singleProductFetch();
-  }, [productSlug])
-  
+    setSingleProduct(updated);
+    setIsEdit(false);
+  };
 
   return (
     <>
       <DeleteModal isOpen={isDelete} onClose={() => setIsDelete(false)} />
 
-      <EditModal isOpen={isEdit} product={singleProduct} onClose={() => setIsEdit(false)} />
+      <EditModal
+        isOpen={isEdit}
+        singleProduct={singleProduct}
+        onClose={() => setIsEdit(false)}
+        onUpdated={handleUpdateProduct}
+      />
 
       <div className="flex flex-col items-center justify-center p-6 w-full">
         <h1 className="text-4xl font-bold text-gray-800 mb-6 text-center">
@@ -119,7 +133,7 @@ const Products = () => {
 
                 <th className="p-4 border-b border-slate-300">Price</th>
                 <th className="p-4 border-b border-slate-300">Category</th>
-                {/* <th className="p-4 border-b border-slate-300">Description</th> */}
+                <th className="p-4 border-b border-slate-300">Description</th>
 
                 <th className="p-4 border-b border-slate-300">Action</th>
               </tr>
@@ -151,15 +165,16 @@ const Products = () => {
                       {product.category?.name}
                     </td>
 
-                    {/* <td className="p-4 border-b border-slate-200">
-                    {product.description}
-                  </td> */}
+                    <td className="p-4 border-b border-slate-200">
+                      {product.description}
+                    </td>
                     <td className="p-4 border-b border-slate-200 flex flex-row ">
                       <FaRegEdit
                         onClick={() => handleEdit(product.slug)}
                         className="cursor-pointer"
                         size={25}
                       />
+
                       <MdDeleteOutline
                         onClick={() => setIsDelete(true)}
                         className="cursor-pointer"

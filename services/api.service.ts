@@ -1,7 +1,6 @@
 import { store } from "@/redux/store";
 import { setToken } from "@/redux/store";
 
-const baseUrl = "https://api.bitechx.com";
 
 export async function loginApi(email: string) {
   try {
@@ -49,10 +48,9 @@ const token = store.getState().auth.token;
   }
 }
 
-export async function productsApi(offset:number,limit:number) {
+export async function productsApi(offset: number, limit: number) {
   try {
-   
-const token = store.getState().auth.token;
+    const token = store.getState().auth.token;
 
     const res = await fetch(`https://api.bitechx.com/products?offset=${offset}&limit=${limit}`, {
       method: "GET",
@@ -62,11 +60,12 @@ const token = store.getState().auth.token;
       },
     });
 
-    
+    if (!res.ok) {
+      const text = await res.text(); 
+      throw new Error(`Request failed (${res.status}): ${text}`);
+    }
 
     const data = await res.json();
-
-
     return data;
   } catch (err) {
     console.error("Error in productsApi:", err);
@@ -76,27 +75,36 @@ const token = store.getState().auth.token;
 
 
 
-export async function singleProductApi(id:any) {
-  try {
-   
-const token = store.getState().auth.token;
 
+export async function singleProductApi(slug: string) {
+  try {
+    const token = store.getState().auth.token;
+    const res = await fetch(`https://api.bitechx.com/products/${slug}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return await res.json();
+  } catch (err) {
+    console.error("Error fetching single product:", err);
+    throw err;
+  }
+}
+
+export async function updateProductApi(id: string, data: any) {
+  try {
+    const token = store.getState().auth.token;
     const res = await fetch(`https://api.bitechx.com/products/${id}`, {
-      method: "GET",
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
+      body: JSON.stringify(data),
     });
-
-    
-
-    const data = await res.json();
-
-
-    return data;
+    return await res.json();
   } catch (err) {
-    console.error("Error in productsApi:", err);
+    console.error("Error updating product:", err);
     throw err;
   }
 }
