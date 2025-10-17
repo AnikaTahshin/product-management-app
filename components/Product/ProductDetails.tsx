@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import { FaEdit, FaTrashAlt } from "react-icons/fa";
 import Loader from "../loader/Loader";
 import EditModal from "../modal/EditModal";
+import DeleteModal from "../modal/DeleteModal";
 
 interface Category {
   id: string;
@@ -30,17 +31,15 @@ const ProductDetails = () => {
   const router = useRouter();
   const [details, setDetails] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isEdit, setIsEdit] = useState(false)
+  const [isEdit, setIsEdit] = useState(false);
+  const [isDelete, setIsDelete] = useState(false);
 
+  // Fetch product by slug
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         const res = await singleProductApi(slug as string);
-        if (res) {
-          setLoading(false);
-          setDetails(res);
-
-        }
+        if (res) setDetails(res);
       } catch (error) {
         console.error("Error fetching product details:", error);
       } finally {
@@ -50,105 +49,135 @@ const ProductDetails = () => {
     if (slug) fetchProduct();
   }, [slug]);
 
-  const handleDelete = async () => {
-    
+
+  // Handle product deletion
+  const handleDeleteProduct = async () => {
+    // if (!details) return;
+
+    // const confirmed = window.confirm("Are you sure you want to delete this product?");
+    // if (!confirmed) return;
+
+    // try {
+    //   const token = localStorage.getItem("token");
+    //   const res = await fetch(`https://api.bitechx.com/products/${details.id}`, {
+    //     method: "DELETE",
+    //     headers: {
+    //       Authorization: `Bearer ${token}`,
+    //     },
+    //   });
+
+    //   if (res.ok) {
+    //     alert("✅ Product deleted successfully!");
+    //     router.push("/products"); // Redirect to products page
+    //   } else {
+    //     alert("❌ Failed to delete product.");
+    //   }
+    // } catch (error) {
+    //   console.error("Error deleting product:", error);
+    //   alert("❌ Error deleting product.");
+    // }
   };
 
+  const handleUpdateProduct = async (updated: Product) => {
+  // refetch from backend
+  const res = await singleProductApi(updated?.slug);
+  setDetails(res);
+  setIsEdit(false);
+};
 
-
- 
-
+  // Format timestamps
   const formattedCreatedAt = details ? new Date(details.createdAt).toLocaleString() : "";
   const formattedUpdatedAt = details ? new Date(details.updatedAt).toLocaleString() : "";
 
-
-
-  const handleUpdateProduct = () => {
-    
-  }
   return (
     <>
+      {isEdit && details && (
+        <EditModal
+          isOpen={isEdit}
+          singleProduct={details}
+          onClose={() => setIsEdit(false)}
+          onUpdated={handleUpdateProduct}
+        />
+      )}
 
-    {
-      isEdit && 
-      <EditModal
-        isOpen={isEdit}
+       <DeleteModal
+        isOpen={isDelete}
+        onClose={() => setIsDelete(false)}
         singleProduct={details}
-        onClose={() => setIsEdit(false)}
-        onUpdated={handleUpdateProduct}
+        onDeleted={handleDeleteProduct}
       />
-    }
-    
-    {
-      loading ? <Loader /> : (
+
+      {loading ? (
+        <Loader />
+      ) : details ? (
         <div className="flex justify-center items-center mt-10 px-4">
-      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
-        <div className="flex flex-col md:flex-row">
-          {/* Left side: Image */}
-          <div className="md:w-1/2 bg-gray-100 flex justify-center items-center">
-            <img
-              src={details?.images?.[0]}
-              alt={details?.name}
-              className="object-contain w-full h-80 md:h-[500px] p-4 rounded-lg"
-            />
-          </div>
+          <div className="w-full max-w-4xl bg-white rounded-2xl shadow-md overflow-hidden border border-gray-200">
+            <div className="flex flex-col md:flex-row">
+              {/* Left side: Image */}
+              <div className="md:w-1/2 bg-gray-100 flex justify-center items-center">
+                <img
+                  src={details?.images?.[0]}
+                  alt={details?.name}
+                  className="object-contain w-full h-80 md:h-[500px] p-4 rounded-lg"
+                />
+              </div>
 
-          {/* Right side: Info */}
-          <div className="md:w-1/2 p-6 flex flex-col justify-between">
-            <div>
-              <h1 className="text-3xl font-semibold text-gray-900 mb-3">{details?.name}</h1>
-              <p className="text-gray-600 mb-4">{details?.description}</p>
+              {/* Right side: Info */}
+              <div className="md:w-1/2 p-6 flex flex-col justify-between">
+                <div>
+                  <h1 className="text-3xl font-semibold text-gray-900 mb-3">
+                    {details?.name}
+                  </h1>
+                  <p className="text-gray-600 mb-4">{details?.description}</p>
 
-              <p className="text-lg font-semibold text-gray-800 mb-2">
-                Price: <span className="text-blue-600">BDT {details?.price}</span>
-              </p>
+                  <p className="text-lg font-semibold text-gray-800 mb-2">
+                    💰 Price: <span className="text-blue-600">BDT {details?.price}</span>
+                  </p>
 
-              <p className="text-sm text-gray-500 mb-1">
-                <strong>Slug:</strong> {details?.slug}
-              </p>
-              <p className="text-sm text-gray-500 mb-1">
-                <strong>Created At:</strong> {formattedCreatedAt}
-              </p>
-              <p className="text-sm text-gray-500 mb-3">
-                <strong>Updated At:</strong> {formattedUpdatedAt}
-              </p>
+                  <p className="text-sm text-gray-500 mb-1">
+                    <strong>Slug:</strong> {details?.slug}
+                  </p>
+                  <p className="text-sm text-gray-500 mb-1">
+                    <strong>Created At:</strong> {formattedCreatedAt}
+                  </p>
+                  <p className="text-sm text-gray-500 mb-3">
+                    <strong>Updated At:</strong> {formattedUpdatedAt}
+                  </p>
 
-              {details?.category && (
-                <div className="flex items-center gap-3 mt-3 p-2 bg-gray-50 rounded-lg">
-                  {/* <img
-                    src={details.category.image}
-                    alt={details.category.name}
-                    className="w-12 h-12 rounded-full object-cover border"
-                  /> */}
-                  <div>
-                    <p className="text-sm text-gray-500">Category</p>
-                    <p className="font-medium text-gray-800">{details.category.name}</p>
-                  </div>
+                  {details?.category && (
+                    <div className="flex items-center gap-3 mt-3 p-2 bg-gray-50 rounded-lg">
+                      <div>
+                        <p className="text-sm text-gray-500">Category</p>
+                        <p className="font-medium text-gray-800">
+                          {details?.category?.name}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            {/* Action buttons */}
-            <div className="flex gap-4 mt-6">
-              <button
-                onClick={() => setIsEdit(true)}
-                className="flex items-center justify-center gap-2 bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition"
-              >
-                <FaEdit /> Edit
-              </button>
-              <button
-                onClick={handleDelete}
-                className="flex items-center justify-center gap-2 bg-red-600 text-white px-5 py-2 rounded-lg hover:bg-red-700 transition"
-              >
-                <FaTrashAlt /> Delete
-              </button>
+                {/* Action buttons */}
+                <div className="flex gap-4 mt-6">
+                  <button
+                    onClick={() => setIsEdit(true)}
+                    className="flex items-center justify-center gap-2 bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition"
+                  >
+                    <FaEdit /> Edit
+                  </button>
+                  <button
+                    onClick={handleDeleteProduct}
+                    className="flex items-center justify-center gap-2 bg-red-600 text-white px-5 py-2 rounded-lg hover:bg-red-700 transition"
+                  >
+                    <FaTrashAlt /> Delete
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
-      )
-    }
+      ) : (
+        <p className="text-center mt-10 text-red-500">Product not found.</p>
+      )}
     </>
   );
 };

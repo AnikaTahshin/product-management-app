@@ -259,7 +259,7 @@ const Products = () => {
                   </tr>
                 ) : (
                   displayedProducts.map((product, index) => (
-                    <tr key={product.id} onClick={() => {console.log("click on the element", product); router.push(`/products/${product.slug}`)}} className="hover:bg-slate-50 cursor-pointer">
+                    <tr key={product.id} onClick={() => {router.push(`/products/${product.slug}`)}} className="hover:bg-slate-50 cursor-pointer">
                       <td className="p-4 border-b border-slate-200">
                         {(currentPage - 1) * limit + index + 1}
                       </td>

@@ -8,46 +8,46 @@ interface Props {
   singleProduct: {
     id: string;
     name: string;
-    price: string;
+    price: string | number;
     description: string;
   } | null;
   onUpdated: (updated: any) => void;
 }
 
-interface Category {
-  id: string;
-  name: string;
-  image: string;
-}
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  images: string[];
-  price: number;
-  slug: string;
-  createdAt: string;
-  updatedAt: string;
-  category?: Category;
-}
+// interface Category {
+//   id: string;
+//   name: string;
+//   image: string;
+// }
+// interface Product {
+//   id: string;
+//   name: string;
+//   description: string;
+//   images: string[];
+//   price: number;
+//   slug: string;
+//   createdAt: string;
+//   updatedAt: string;
+//   category?: Category;
+// }
 const EditModal = ({ isOpen, onClose, singleProduct, onUpdated }: Props ) => {
   const [name, setName] = useState(singleProduct?.name || "");
-  const [price, setPrice] = useState<string>(singleProduct?.price || "");
+  const [price, setPrice] = useState<string>((singleProduct?.price ?? "").toString());
   const [description, setDescription] = useState(
     singleProduct?.description || ""
   );
-  const [productId, setProductId] = useState<string | null>(
-    singleProduct?.id || null
-  );
+  const [productId, setProductId] = useState<string | null>(singleProduct?.id || null);
+
 
   useEffect(() => {
     if (singleProduct) {
-      setProductId(singleProduct.id);
-      setName(singleProduct.name);
-      setPrice(singleProduct.price);
-      setDescription(singleProduct.description);
+      setProductId(singleProduct?.id);
+      setName(singleProduct?.name);
+      setPrice((singleProduct?.price ?? "").toString());
+      setDescription(singleProduct?.description);
     }
   }, [singleProduct]);
+  // console.log("deails page id",productId)
 
   const handleUpdate = async () => {
     if (!productId) {
@@ -69,7 +69,7 @@ const EditModal = ({ isOpen, onClose, singleProduct, onUpdated }: Props ) => {
       return;
     }
 
-    if (price === "" || price === undefined || price === "0" || price <= "0") {
+    if (price.trim() === "" || isNaN(Number(price)) || Number(price) <= 0) {
       toast("Please enter correct value!", {
         position: "top-right",
         autoClose: 5000,
@@ -103,9 +103,8 @@ const EditModal = ({ isOpen, onClose, singleProduct, onUpdated }: Props ) => {
       const updated = await updateProductApi(productId, {
         name,
         description,
-        price,
+        price: Number(price),
       });
-
       if (updated) {
         toast.success("Product updated!", {
           position: "top-right",
