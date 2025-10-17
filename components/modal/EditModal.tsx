@@ -14,7 +14,23 @@ interface Props {
   onUpdated: (updated: any) => void;
 }
 
-const EditModal = ({ isOpen, onClose, singleProduct, onUpdated }: Props) => {
+interface Category {
+  id: string;
+  name: string;
+  image: string;
+}
+interface Product {
+  id: string;
+  name: string;
+  description: string;
+  images: string[];
+  price: number;
+  slug: string;
+  createdAt: string;
+  updatedAt: string;
+  category?: Category;
+}
+const EditModal = ({ isOpen, onClose, singleProduct, onUpdated }: Props ) => {
   const [name, setName] = useState(singleProduct?.name || "");
   const [price, setPrice] = useState<string>(singleProduct?.price || "");
   const [description, setDescription] = useState(

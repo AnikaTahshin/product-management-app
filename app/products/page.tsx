@@ -2,6 +2,7 @@
 import {
   productsApi,
   productsApiLength,
+  searchProductsApi,
   singleProductApi,
 } from "@/services/api.service";
 import React, { useEffect, useState } from "react";
@@ -28,6 +29,9 @@ const Products = () => {
   const [singleProduct, setSingleProduct] = useState<productType | null>(null);
   const limit = 10;
   const router = useRouter();
+   const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+    const [searchText, setSearchText] = useState("");
 
   const getAllProductsLength = async () => {
     const res = await productsApiLength();
@@ -135,6 +139,40 @@ const Products = () => {
     setIsAdd(false);
   };
 
+
+
+   // On offset change: paginate active dataset
+  useEffect(() => {
+    if (isSearching) {
+      const start = offset;
+      const end = offset + limit;
+      setProducts(searchResults.slice(start, end));
+    } else {
+      fetchAllProducts();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [offset]);
+
+
+  const handleSearch = async () => {
+    const text = searchText.trim();
+    if (!text) {
+      setIsSearching(false);
+      setSearchResults([]);
+      setOffset(0);
+      await fetchAllProducts();
+      return;
+    }
+    const res = await searchProductsApi(text);
+    setIsSearching(true);
+    setSearchResults(res || []);
+    setOffset(0);
+    setProducts((res || []).slice(0, limit));
+  };
+
+  const totalItemCount = isSearching ? searchResults.length : allProducts.length;
+  const totalPages = Math.max(1, Math.ceil(totalItemCount / limit));
+
   useEffect(() => { getAllProductsLength(); }, []);
   useEffect(() => { fetchAllProducts(); }, [offset]);
 
@@ -176,11 +214,16 @@ const Products = () => {
 
             <div className="relative w-64">
               <input
+                value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSearch();
+              }}
                 type="text"
                 placeholder="Search products..."
                 className="w-full h-11 pl-4 pr-12 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
               />
-              <button className="absolute right-1.5 top-1.5 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full transition">
+              <button onClick={handleSearch} className="absolute right-1.5 top-1.5 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full transition">
                 <MdSearch className="text-xl" />
               </button>
             </div>
