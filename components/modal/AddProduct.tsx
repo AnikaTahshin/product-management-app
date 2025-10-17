@@ -49,7 +49,6 @@ const AddProduct = ({ isOpen, onClose, onUpdated }: Props) => {
       categoryId,
     };
 
-    console.log("sending body data", data);
 
     try {
       const added = await AddProductApi(data);

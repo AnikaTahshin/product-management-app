@@ -150,7 +150,6 @@ export async function categoryIdApi() {
     });
 
     const result =  await res.json();
-    console.log("get categories result", result)
     return result
   } catch (err) {
     console.error("Error creating product:", err);
@@ -162,7 +161,6 @@ export async function categoryIdApi() {
 export async function AddProductApi(data:addProductType) {
 
 
-  console.log("on server getting data",data)
   try {
     const token = store.getState().auth.token;
 
@@ -182,4 +180,27 @@ export async function AddProductApi(data:addProductType) {
     throw err;
   }
 }
+
+
+
+export async function filterProductApi(id: string) {
+  try {
+    const token = store.getState().auth.token;
+    const res = await fetch(`https://api.bitechx.com/products?categoryId=${id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const result = await res.json();
+
+    return result;
+  } catch (err) {
+    console.error("Error filtering products:", err);
+    throw err;
+  }
+}
+
 
