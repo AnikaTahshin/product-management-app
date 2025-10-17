@@ -5,3 +5,11 @@ export interface productType {
   description: string;
   slug?: string;
 }
+
+export interface addProductType {
+ name: string;
+    description: string;
+    images: (string | File)[];
+    price: number;
+    categoryId: string;
+}

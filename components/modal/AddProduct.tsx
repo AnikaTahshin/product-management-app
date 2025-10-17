@@ -13,7 +13,7 @@ const AddProduct = ({ isOpen, onClose, onUpdated }: Props) => {
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState("");
-  const [categoryId, setCategoryId] = useState("9c1129eb-cb7f-4c34-a94e-193a40f37a87");
+  const [categoryId, setCategoryId] = useState("");
   const [categories, setCategories] = useState<any[]>([]);
 
   // Fetch categories on mount
@@ -46,7 +46,7 @@ const AddProduct = ({ isOpen, onClose, onUpdated }: Props) => {
       description,
       images: [image || "https://laravelpoint.com/files/p_img.jpg"], // placeholder image
       price: Number(price),
-      categoryId, // ensure this is a valid ID from fetched categories
+      categoryId,
     };
 
     console.log("sending body data", data);
@@ -54,10 +54,14 @@ const AddProduct = ({ isOpen, onClose, onUpdated }: Props) => {
     try {
       const added = await AddProductApi(data);
 
-      
-
       toast.success("Product added successfully!", { transition: Bounce });
       onUpdated(added);
+      setName("");
+      setPrice("");
+      setDescription("");
+      setImage("");
+      setCategoryId("");
+
       onClose();
     } catch (err) {
       console.error("Failed to add product:", err);
@@ -65,11 +69,22 @@ const AddProduct = ({ isOpen, onClose, onUpdated }: Props) => {
     }
   };
 
+  const handleClose = () => {
+    setName("");
+    setPrice("");
+    setDescription("");
+    setImage("");
+    setCategoryId("");
+    onClose();
+  };
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="fixed inset-0 bg-black opacity-50" onClick={onClose}></div>
+      <div
+        className="fixed inset-0 bg-black opacity-50"
+        onClick={onClose}
+      ></div>
       <div className="bg-white p-6 rounded-lg z-50 relative w-96">
         <h2 className="text-xl font-bold mb-4">Add Product</h2>
 
@@ -95,26 +110,20 @@ const AddProduct = ({ isOpen, onClose, onUpdated }: Props) => {
           onChange={(e) => setDescription(e.target.value)}
         />
 
-    <input
+        <select
           className="w-full mb-3 p-2 border rounded"
-          type="text"
-          placeholder="Category ID"
           value={categoryId}
           onChange={(e) => setCategoryId(e.target.value)}
-        />
-        {/* {categories.length > 0 && (
-          <select
-            className="w-full mb-3 p-2 border rounded"
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-          >
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
-        )} */}
+        >
+          <option value="" disabled>
+            Select category
+          </option>
+          {categories.map((cat) => (
+            <option key={cat.id} value={cat.id}>
+              {cat.name}
+            </option>
+          ))}
+        </select>
 
         <input
           className="w-full mb-3 p-2 border rounded"
@@ -127,7 +136,7 @@ const AddProduct = ({ isOpen, onClose, onUpdated }: Props) => {
         <div className="flex justify-end space-x-2">
           <button
             className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-            onClick={onClose}
+            onClick={handleClose}
           >
             Cancel
           </button>

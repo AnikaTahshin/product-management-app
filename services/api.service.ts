@@ -1,5 +1,7 @@
 import { store } from "@/redux/store";
 import { setToken } from "@/redux/store";
+import { addProductType } from "@/types/types";
+
 
 
 export async function loginApi(email: string) {
@@ -138,7 +140,7 @@ export async function categoryIdApi() {
   try {
     const token = store.getState().auth.token;
 
-    const res = await fetch("https://api.bitechx.com/products", {
+    const res = await fetch("https://api.bitechx.com/categories", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -148,7 +150,7 @@ export async function categoryIdApi() {
     });
 
     const result =  await res.json();
-    console.log("see cat result", result.category)
+    console.log("get categories result", result)
     return result
   } catch (err) {
     console.error("Error creating product:", err);
@@ -157,7 +159,10 @@ export async function categoryIdApi() {
 }
 
 
-export async function AddProductApi(data: { name: string; description: string; price: number; categoryId: string; }) {
+export async function AddProductApi(data:addProductType) {
+
+
+  console.log("on server getting data",data)
   try {
     const token = store.getState().auth.token;
 
@@ -171,8 +176,7 @@ export async function AddProductApi(data: { name: string; description: string; p
     });
 
     const result =  await res.json();
-console.log("meem see result of adding", result)
-    return
+    return result
   } catch (err) {
     console.error("Error creating product:", err);
     throw err;
