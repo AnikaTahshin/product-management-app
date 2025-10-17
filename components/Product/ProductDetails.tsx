@@ -165,7 +165,7 @@ const ProductDetails = () => {
                     <FaEdit /> Edit
                   </button>
                   <button
-                    onClick={handleDeleteProduct}
+                    onClick={() => setIsDelete(true)}
                     className="flex items-center justify-center gap-2 bg-red-600 text-white px-5 py-2 rounded-lg hover:bg-red-700 transition"
                   >
                     <FaTrashAlt /> Delete

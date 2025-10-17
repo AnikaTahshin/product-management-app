@@ -142,16 +142,16 @@ const Products = () => {
 
 
    // On offset change: paginate active dataset
-  useEffect(() => {
-    if (isSearching) {
-      const start = offset;
-      const end = offset + limit;
-      setProducts(searchResults.slice(start, end));
-    } else {
-      fetchAllProducts();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [offset]);
+  // useEffect(() => {
+  //   if (isSearching) {
+  //     const start = offset;
+  //     const end = offset + limit;
+  //     setProducts(searchResults.slice(start, end));
+  //   } else {
+  //     fetchAllProducts();
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [offset]);
 
 
   const handleSearch = async () => {
