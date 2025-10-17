@@ -53,7 +53,7 @@ const FilterProduct = ({
       </select>
 
       <div className="mt-4 w-full max-w-md">
-        {filteredProducts.length > 0 ? (
+        {filteredProducts.length > 0 && (
           <ul className="space-y-2">
             {filteredProducts.map((p) => (
               <li
@@ -64,9 +64,7 @@ const FilterProduct = ({
               </li>
             ))}
           </ul>
-        ) : categoryId ? (
-          <p className="text-gray-500 mt-2">No products found.</p>
-        ) : null}
+        ) }
       </div>
     </div>
   );
