@@ -14,6 +14,7 @@ import { productType } from "@/types/types";
 import AddProduct from "@/components/modal/AddProduct";
 import Loader from "@/components/loader/Loader";
 import FilterProduct from "@/components/filterProduct/FilterProduct";
+import { useRouter } from "next/navigation";
 
 const Products = () => {
   const [allProducts, setAllProducts] = useState<any[]>([]);
@@ -26,6 +27,7 @@ const Products = () => {
   const [isAdd, setIsAdd] = useState(false);
   const [singleProduct, setSingleProduct] = useState<productType | null>(null);
   const limit = 10;
+  const router = useRouter();
 
   const getAllProductsLength = async () => {
     const res = await productsApiLength();
@@ -164,7 +166,7 @@ const Products = () => {
             Products List
           </h1>
 
-          <div className="flex flex-row justify-between items-center w-full max-w-4xl mb-6">
+          <div className="flex flex-col md:flex-row justify-between items-center w-full max-w-4xl mb-6">
             <button
               onClick={() => setIsAdd(true)}
               className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg shadow transition-all"
@@ -214,7 +216,7 @@ const Products = () => {
                   </tr>
                 ) : (
                   displayedProducts.map((product, index) => (
-                    <tr key={product.id} className="hover:bg-slate-50 cursor-pointer">
+                    <tr key={product.id} onClick={() => {console.log("click on the element", product); router.push(`/products/${product.slug}`)}} className="hover:bg-slate-50 cursor-pointer">
                       <td className="p-4 border-b border-slate-200">
                         {(currentPage - 1) * limit + index + 1}
                       </td>
@@ -224,7 +226,7 @@ const Products = () => {
                           <img src={product.images[0]} alt={product.name} className="w-16 h-16 object-cover rounded" />
                         )}
                       </td>
-                      <td className="p-4 border-b border-slate-200">{product.price}</td>
+                      <td className="p-4 border-b border-slate-200">BDT. {product.price}</td>
                       <td className="p-4 border-b border-slate-200">{product.category?.name}</td>
                       <td className="p-4 border-b border-slate-200">{product.description}</td>
                       <td className="p-4 border-b border-slate-200 flex flex-row">

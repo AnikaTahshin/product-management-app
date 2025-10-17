@@ -28,7 +28,6 @@ const DeleteModal = ({ isOpen, onClose, singleProduct, onDeleted }: Props) => {
         transition: Bounce,
       });
 
-      // 🔥 Call parent callback to remove from UI
       onDeleted(deleted);
 
       onClose();

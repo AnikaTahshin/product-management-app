@@ -1,19 +1,21 @@
 "use client"
-import { selectToken } from "@/redux/store";
 import { loginApi } from "@/services/api.service";
-import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 const Login = () => {
   const [email, setEmail] = useState("");
-  const token = useSelector(selectToken);
+  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     await loginApi(email);
   };
 
-
+useEffect(() => {
+  const token = localStorage.getItem("token");
+  if (token) router.replace("/"); 
+}, []);
 
   return (
     <>

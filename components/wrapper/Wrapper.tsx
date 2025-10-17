@@ -4,8 +4,8 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "../sidebar/Sidebar";
 import Navbar from "../navbar/Navbar";
-import { useSelector } from "react-redux";
-import { selectToken } from "@/redux/store";
+import { useDispatch, useSelector } from "react-redux";
+import { selectToken, setToken } from "@/redux/store";
 import Login from "../login/Login";
 
 interface AuthWrapperProps {
@@ -16,16 +16,26 @@ const AuthWrapper = ({ children }: AuthWrapperProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const token = useSelector(selectToken);
+const dispatch = useDispatch();
+  // const token = useSelector(selectToken);
+ const [loading, setLoading] = useState(true);
 
+  // Restore token from localStorage
   useEffect(() => {
-    if (token && router) {
-      router.push("/");
+    const storedToken = localStorage.getItem("token");
+    if (storedToken) {
+      dispatch(setToken(storedToken));
     }
-  }, [token, router]);
+    setLoading(false); // token check finished
+  }, [dispatch]);
 
-  if (!token) {
-    return <Login />;
+  if (loading) {
+    // Show nothing or a loader while checking token
+    return null;
   }
+
+  // Show login if no token
+  if (!token) return <Login />;
 
   return (
     <div className="flex min-h-screen h-screen overflow-y-hidden">

@@ -7,21 +7,29 @@ import Link from "next/link";
 import { FaUserCircle } from "react-icons/fa";
 import { MdSettings } from "react-icons/md";
 import { MdLogout } from "react-icons/md";
-import { clearToken } from "@/redux/store";
+import { clearToken, store } from "@/redux/store";
 import { useDispatch } from "react-redux";
+import { useRouter } from "next/navigation";
 
 const Navbar = ({ setIsOpen }: any) => {
   
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const dispatch = useDispatch();
+  const router = useRouter();
 
   const toggleUserMenu = () => {
     setIsUserMenuOpen(!isUserMenuOpen);
   };
 
-    const handleLogout = () => {
-    dispatch(clearToken());
-  };
+  //   const handleLogout = () => {
+  //   dispatch(clearToken());
+  // };
+
+  const handleLogout = () => {
+  localStorage.removeItem("token"); 
+  store.dispatch(clearToken());
+  router.push("/");
+};
 
   return (
     <>

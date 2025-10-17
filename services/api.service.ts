@@ -17,6 +17,9 @@ export async function loginApi(email: string) {
     const data = await res.json();
 
     store.dispatch(setToken(data.token));
+    localStorage.setItem("token", data.token);
+
+    
 
     return data;
   } catch (err) {
