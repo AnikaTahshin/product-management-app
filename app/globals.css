@@ -17,7 +17,7 @@
 }
 
 
-@layer utilities{
+/* @layer utilities{
   font-unbounded{
   font-family: var(--font-unbounded);
 
@@ -42,15 +42,15 @@
   font-family: var(--font-chakrapetch);
 
   }
-}
+} */
 .sidebar-nav li.active{
-  background-color: var(--prim-color);
-  color: var(--white);
+  background-color: white;
+  color: black;
 }
 
 .sidebar-nav li:hover{
-  background-color: var(--prim-color);
-  color: var(--white);
+  background-color: white;
+  color: black;
 }
 @keyframes fade-in {
   from {

@@ -24,14 +24,14 @@ const Sidebar = ({ isOpen, setIsOpen }: any) => {
 
   return (
     <div
-      className={`h-100vh w-[320px] min-h-[100vh] pb-0 p-5 sidebar ${isOpen ? "bg-[#bfbfbf]" : "bg-[#bfbfbf]"} shadow-xl fixed lg:relative transition-transform duration-300 z-50 ${
+      className={`h-100vh w-[320px] min-h-[100vh] pb-0 p-5 sidebar ${isOpen ? "bg-[#5A9367]" : "bg-[#5A9367]"} shadow-xl fixed lg:relative transition-transform duration-300 z-50 ${
         isOpen ? "translate-x-0" : "-translate-x-full"
       } lg:translate-x-0`}
     >
       <div className="nav-logo text-center py-2">
         <Link href="/" className="cursor-pointer">
-          <h1 className="text-3xl font-semibold font-unbounded">
-           <span className="text-[#066dca] font-unbounded">Product</span> Management
+          <h1 className="text-3xl text-white font-semibold font-unbounded">
+           Product Management
           </h1>
         </Link>
       </div>
@@ -47,8 +47,8 @@ const Sidebar = ({ isOpen, setIsOpen }: any) => {
               key={href}
               className={`py-4 px-4 rounded-xl transition-colors duration-300 font-sora ${
                 active
-                  ? "bg-[var(--prim-color)] text-white"
-                  : "hover:bg-[var(--prim-color)]"
+                  ? "bg-white text-black"
+                  : "hover:bg-white hover:text-black"
               }`}
             >
               <Link
@@ -57,14 +57,14 @@ const Sidebar = ({ isOpen, setIsOpen }: any) => {
               >
                 <span
                   className={`${
-                    active ? "text-white" : "text-[#066dca] group-hover:text-white"
+                    active ? "text-black" : "text-white group-hover:text-black"
                   }`}
                 >
                   {icon}
                 </span>
                 <p
                   className={`${
-                    active ? "text-white" : "text-neutral-500 group-hover:text-white"
+                    active ? "text-black" : "text-white group-hover:text-black"
                   }`}
                 >
                   {label}

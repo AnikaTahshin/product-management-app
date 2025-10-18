@@ -1,9 +1,10 @@
 "use client";
 
-import { singleProductApi } from "@/services/api.service";
+import { singleProductApi, deleteProductApi } from "@/services/api.service";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { FaEdit, FaTrashAlt } from "react-icons/fa";
+import { toast } from "react-toastify";
 import Loader from "../loader/Loader";
 import EditModal from "../modal/EditModal";
 import DeleteModal from "../modal/DeleteModal";
@@ -40,50 +41,38 @@ const ProductDetails = () => {
       try {
         const res = await singleProductApi(slug as string);
         if (res) setDetails(res);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error fetching product details:", error);
+        // If slug is invalid, redirect to products page
+        if (error?.message?.includes("Invalid product slug")) {
+          router.push("/products");
+        }
       } finally {
         setLoading(false);
       }
     };
     if (slug) fetchProduct();
-  }, [slug]);
+  }, [slug, router]);
 
 
-  // Handle product deletion
-  const handleDeleteProduct = async () => {
-    // if (!details) return;
-
-    // const confirmed = window.confirm("Are you sure you want to delete this product?");
-    // if (!confirmed) return;
-
-    // try {
-    //   const token = localStorage.getItem("token");
-    //   const res = await fetch(`https://api.bitechx.com/products/${details.id}`, {
-    //     method: "DELETE",
-    //     headers: {
-    //       Authorization: `Bearer ${token}`,
-    //     },
-    //   });
-
-    //   if (res.ok) {
-    //     alert("✅ Product deleted successfully!");
-    //     router.push("/products"); // Redirect to products page
-    //   } else {
-    //     alert("❌ Failed to delete product.");
-    //   }
-    // } catch (error) {
-    //   console.error("Error deleting product:", error);
-    //   alert("❌ Error deleting product.");
-    // }
+  // Handle product deletion callback from modal
+  const handleDeleteProduct = (deleted: any) => {
+    // Modal already shows toast and handles the API call
+    // Redirect to products page with a flag to indicate delete happened
+    router.push("/products?deleted=true");
   };
 
   const handleUpdateProduct = async (updated: Product) => {
-  // refetch from backend
-  const res = await singleProductApi(updated?.slug);
-  setDetails(res);
-  setIsEdit(false);
-};
+    // refetch from backend
+    const res = await singleProductApi(updated?.slug);
+    setDetails(res);
+    setIsEdit(false);
+    
+    // Update URL if slug changed
+    if (updated?.slug && updated.slug !== slug) {
+      router.replace(`/products/${updated.slug}`);
+    }
+  };
 
   // Format timestamps
   const formattedCreatedAt = details ? new Date(details.createdAt).toLocaleString() : "";
@@ -131,7 +120,7 @@ const ProductDetails = () => {
                   <p className="text-gray-600 mb-4">{details?.description}</p>
 
                   <p className="text-lg font-semibold text-gray-800 mb-2">
-                    💰 Price: <span className="text-blue-600">BDT {details?.price}</span>
+                    💰 Price: <span className="text-[#5A9367]">BDT {details?.price}</span>
                   </p>
 
                   <p className="text-sm text-gray-500 mb-1">
@@ -160,7 +149,7 @@ const ProductDetails = () => {
                 <div className="flex gap-4 mt-6">
                   <button
                     onClick={() => setIsEdit(true)}
-                    className="flex items-center justify-center gap-2 bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition"
+                    className="flex items-center justify-center gap-2 bg-[#5A9367] text-white px-5 py-2 rounded-lg hover:bg-[#438953] transition"
                   >
                     <FaEdit /> Edit
                   </button>

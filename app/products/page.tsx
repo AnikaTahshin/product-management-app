@@ -15,7 +15,7 @@ import { productType } from "@/types/types";
 import AddProduct from "@/components/modal/AddProduct";
 import Loader from "@/components/loader/Loader";
 import FilterProduct from "@/components/filterProduct/FilterProduct";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const Products = () => {
   const [allProducts, setAllProducts] = useState<any[]>([]);
@@ -29,17 +29,18 @@ const Products = () => {
   const [singleProduct, setSingleProduct] = useState<productType | null>(null);
   const limit = 10;
   const router = useRouter();
-   const [searchResults, setSearchResults] = useState<any[]>([]);
+  const searchParams = useSearchParams();
+  const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-    const [searchText, setSearchText] = useState("");
+  const [searchText, setSearchText] = useState("");
 
   const getAllProductsLength = async () => {
     const res = await productsApiLength();
     setAllProducts(res);
   };
 
-  const fetchAllProducts = async () => {
-    const res = await productsApi(offset, limit);
+  const fetchAllProducts = async (currentOffset = offset) => {
+    const res = await productsApi(currentOffset, limit);
     setProducts(res);
   };
 
@@ -47,41 +48,98 @@ const Products = () => {
 
   const displayedProducts = isFiltering
     ? filteredProducts.slice(filteredOffset, filteredOffset + limit)
+    : isSearching
+    ? searchResults.slice(offset, offset + limit)
     : products;
 
   const totalAllPages = Math.ceil(allProducts.length / limit);
   const totalFilteredPages = Math.ceil(filteredProducts.length / limit);
+  const totalSearchPages = Math.ceil(searchResults.length / limit);
 
   const currentPage = isFiltering
     ? Math.floor(filteredOffset / limit) + 1
+    : isSearching
+    ? Math.floor(offset / limit) + 1
     : Math.floor(offset / limit) + 1;
+
+  // Update URL when page changes
+  const updateURL = (page: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", page.toString());
+    router.replace(`/products?${params.toString()}`, { scroll: false });
+  };
 
   // Pagination handlers
   const handlePage = (page: number) => {
-    if (isFiltering) setFilteredOffset((page - 1) * limit);
-    else setOffset((page - 1) * limit);
-  };
+  if (isFiltering) {
+    setFilteredOffset((page - 1) * limit);
+  } else if (isSearching) {
+    setOffset((page - 1) * limit);
+  } else {
+    setOffset((page - 1) * limit);
+  }
+  updateURL(page);
+
+  // ✅ Scroll to top
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+};
+
 
   const handleNext = () => {
-    if (isFiltering) {
-      if (filteredOffset + limit < filteredProducts.length)
-        setFilteredOffset(filteredOffset + limit);
-    } else {
-      if (currentPage < totalAllPages) setOffset(offset + limit);
+  if (isFiltering) {
+    if (filteredOffset + limit < filteredProducts.length) {
+      setFilteredOffset(filteredOffset + limit);
+      updateURL(currentPage + 1);
+      window.scrollTo({ top: 0, behavior: "smooth" }); // ✅
     }
-  };
+  } else if (isSearching) {
+    if (currentPage < totalSearchPages) {
+      setOffset(offset + limit);
+      updateURL(currentPage + 1);
+      window.scrollTo({ top: 0, behavior: "smooth" }); // ✅
+    }
+  } else {
+    if (currentPage < totalAllPages) {
+      setOffset(offset + limit);
+      updateURL(currentPage + 1);
+      window.scrollTo({ top: 0, behavior: "smooth" }); // ✅
+    }
+  }
+};
 
-  const handlePrev = () => {
-    if (isFiltering) {
-      if (filteredOffset > 0) setFilteredOffset(filteredOffset - limit);
-    } else {
-      if (currentPage > 1) setOffset(offset - limit);
+const handlePrev = () => {
+  if (isFiltering) {
+    if (filteredOffset > 0) {
+      setFilteredOffset(filteredOffset - limit);
+      updateURL(currentPage - 1);
+      window.scrollTo({ top: 0, behavior: "smooth" }); // ✅
     }
-  };
+  } else if (isSearching) {
+    if (currentPage > 1) {
+      setOffset(offset - limit);
+      updateURL(currentPage - 1);
+      window.scrollTo({ top: 0, behavior: "smooth" }); 
+    }
+  } else {
+    if (currentPage > 1) {
+      setOffset(offset - limit);
+      updateURL(currentPage - 1);
+      window.scrollTo({ top: 0, behavior: "smooth" }); 
+    }
+  }
+};
+
 
   const getPageNumbers = () => {
     const maxPagesToShow = 5;
-    const totalPagesToUse = isFiltering ? totalFilteredPages : totalAllPages;
+    const totalPagesToUse = isFiltering
+      ? totalFilteredPages
+      : isSearching
+      ? totalSearchPages
+      : totalAllPages;
 
     let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
     let endPage = startPage + maxPagesToShow - 1;
@@ -112,14 +170,26 @@ const Products = () => {
     setProducts((prev) =>
       prev.map((p) =>
         p.id === updated.id
-          ? { ...p, name: updated.name, price: updated.price, description: updated.description, slug: updated.slug }
+          ? {
+              ...p,
+              name: updated.name,
+              price: updated.price,
+              description: updated.description,
+              slug: updated.slug,
+            }
           : p
       )
     );
     setFilteredProducts((prev) =>
       prev.map((p) =>
         p.id === updated.id
-          ? { ...p, name: updated.name, price: updated.price, description: updated.description, slug: updated.slug }
+          ? {
+              ...p,
+              name: updated.name,
+              price: updated.price,
+              description: updated.description,
+              slug: updated.slug,
+            }
           : p
       )
     );
@@ -139,20 +209,7 @@ const Products = () => {
     setIsAdd(false);
   };
 
-
-
-   // On offset change: paginate active dataset
-  // useEffect(() => {
-  //   if (isSearching) {
-  //     const start = offset;
-  //     const end = offset + limit;
-  //     setProducts(searchResults.slice(start, end));
-  //   } else {
-  //     fetchAllProducts();
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [offset]);
-
+  
 
   const handleSearch = async () => {
     const text = searchText.trim();
@@ -160,6 +217,7 @@ const Products = () => {
       setIsSearching(false);
       setSearchResults([]);
       setOffset(0);
+      router.replace("/products", { scroll: false });
       await fetchAllProducts();
       return;
     }
@@ -167,14 +225,38 @@ const Products = () => {
     setIsSearching(true);
     setSearchResults(res || []);
     setOffset(0);
-    setProducts((res || []).slice(0, limit));
+    router.replace("/products", { scroll: false });
   };
 
-  const totalItemCount = isSearching ? searchResults.length : allProducts.length;
-  const totalPages = Math.max(1, Math.ceil(totalItemCount / limit));
+  const totalItemCount = isSearching
+    ? searchResults.length
+    : allProducts.length;
 
-  useEffect(() => { getAllProductsLength(); }, []);
-  useEffect(() => { fetchAllProducts(); }, [offset]);
+  // Initialize from URL params
+  useEffect(() => {
+    const page = parseInt(searchParams.get("page") || "1");
+    const deleted = searchParams.get("deleted");
+    const initialOffset = (page - 1) * limit;
+    setOffset(initialOffset);
+    fetchAllProducts(initialOffset); // Fetch with correct offset immediately
+    
+    // If coming from delete, refetch all data
+    if (deleted === "true") {
+      getAllProductsLength();
+      // Clean up the URL parameter
+      router.replace("/products" + (page > 1 ? `?page=${page}` : ""), { scroll: false });
+    }
+  }, [searchParams, limit, router]);
+
+  useEffect(() => {
+    getAllProductsLength();
+  }, []);
+  useEffect(() => {
+    fetchAllProducts();
+  }, [offset]);
+
+  !searchText && isSearching && setIsSearching(false);
+
 
   return (
     <>
@@ -207,7 +289,7 @@ const Products = () => {
           <div className="flex flex-col md:flex-row justify-between items-center w-full max-w-4xl mb-6">
             <button
               onClick={() => setIsAdd(true)}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg shadow transition-all"
+              className="flex items-center gap-2 bg-[#5A9367] hover:bg-[#438953] text-white font-semibold px-4 py-2 rounded-lg shadow transition-all"
             >
               + Add Product
             </button>
@@ -215,15 +297,18 @@ const Products = () => {
             <div className="relative w-64">
               <input
                 value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleSearch();
-              }}
+                onChange={(e) => setSearchText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSearch();
+                }}
                 type="text"
                 placeholder="Search products..."
-                className="w-full h-11 pl-4 pr-12 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                className="w-full h-11 pl-4 pr-12 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-[#5A9367] focus:border-transparent transition"
               />
-              <button onClick={handleSearch} className="absolute right-1.5 top-1.5 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full transition">
+              <button
+                onClick={handleSearch}
+                className="absolute right-1.5 top-1.5 bg-[#5A9367] hover:bg-[#438953] text-white p-2 rounded-full transition"
+              >
                 <MdSearch className="text-xl" />
               </button>
             </div>
@@ -231,7 +316,7 @@ const Products = () => {
             <FilterProduct
               onFiltered={(products) => {
                 setFilteredProducts(products);
-                setFilteredOffset(0); 
+                setFilteredOffset(0);
               }}
             />
           </div>
@@ -258,24 +343,56 @@ const Products = () => {
                     </td>
                   </tr>
                 ) : (
-                  displayedProducts.map((product, index) => (
-                    <tr key={product.id} onClick={() => {router.push(`/products/${product.slug}`)}} className="hover:bg-slate-50 cursor-pointer">
+                  displayedProducts?.map((product, index) => (
+                    <tr
+                      key={product.id}
+                      onClick={() => {
+                        router.push(`/products/${product.slug}`);
+                      }}
+                      className="hover:bg-slate-50 cursor-pointer"
+                    >
                       <td className="p-4 border-b border-slate-200">
                         {(currentPage - 1) * limit + index + 1}
                       </td>
-                      <td className="p-4 border-b border-slate-200">{product.name}</td>
+                      <td className="p-4 border-b border-slate-200">
+                        {product.name}
+                      </td>
                       <td className="p-4 border-b border-slate-200">
                         {product.images && product.images.length > 0 && (
-                          <img src={product.images[0]} alt={product.name} className="w-16 h-16 object-cover rounded" />
+                          <img
+                            src={product.images[0]}
+                            alt={product.name}
+                            className="w-16 h-16 object-cover rounded"
+                          />
                         )}
                       </td>
-                      <td className="p-4 border-b border-slate-200">BDT. {product.price}</td>
-                      <td className="p-4 border-b border-slate-200">{product.category?.name}</td>
-                      <td className="p-4 border-b border-slate-200">{product.description}</td>
-                      <td className="p-4 border-b border-slate-200 flex flex-row">
-                        <FaRegEdit onClick={() => handleEdit(product.slug)} className="cursor-pointer" size={25} />
-                        <MdDeleteOutline onClick={() => handleDelete(product.slug)} className="cursor-pointer" size={25} />
+                      <td className="p-4 border-b border-slate-200">
+                        BDT. {product.price}
                       </td>
+                      <td className="p-4 border-b border-slate-200">
+                        {product.category?.name}
+                      </td>
+                       <td className="p-4 border-b border-slate-200">
+                         {product.description}
+                       </td>
+                       <td className="p-4 border-b border-slate-200 flex flex-row gap-2">
+                         <FaRegEdit 
+                           onClick={(e) => {
+                             e.stopPropagation();
+                             handleEdit(product.slug);
+                           }} 
+                           className="cursor-pointer hover:text-[#5A9367]" 
+                           size={25} 
+                         />
+                         <MdDeleteOutline 
+                           onClick={(e) => {
+                             e.stopPropagation();
+                             handleDelete(product.slug);
+                           }} 
+                           className="cursor-pointer hover:text-[#5A9367]" 
+                           size={25} 
+                         />
+                       </td>
                     </tr>
                   ))
                 )}
@@ -290,11 +407,25 @@ const Products = () => {
                 <button
                   onClick={handlePrev}
                   disabled={currentPage === 1}
-                  className={`flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""}`}
+                  className={`flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 ${
+                    currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                 >
                   <span className="sr-only">Previous</span>
-                  <svg className="w-2.5 h-2.5 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 1 1 5l4 4" />
+                  <svg
+                    className="w-2.5 h-2.5 rtl:rotate-180"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 6 10"
+                  >
+                    <path
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M5 1 1 5l4 4"
+                    />
                   </svg>
                 </button>
               </li>
@@ -303,7 +434,11 @@ const Products = () => {
                 <li key={pageNum}>
                   <button
                     onClick={() => handlePage(pageNum)}
-                    className={`flex items-center justify-center px-3 h-8 leading-tight border ${currentPage === pageNum ? "text-blue-600 border-blue-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700" : "text-gray-500 bg-white border-gray-300 hover:bg-gray-100 hover:text-gray-700"}`}
+                    className={`flex items-center justify-center px-3 h-8 leading-tight border ${
+                      currentPage === pageNum
+                        ? "text-white border-[#5A9367] bg-[#5A9367] hover:bg-[#5A9367] hover:text-white"
+                        : "text-gray-500 bg-white border-gray-300 hover:bg-gray-100 hover:text-gray-700"
+                    }`}
                   >
                     {pageNum}
                   </button>
@@ -313,12 +448,38 @@ const Products = () => {
               <li>
                 <button
                   onClick={handleNext}
-                  disabled={isFiltering ? currentPage === totalFilteredPages : currentPage === totalAllPages}
-                  className={`flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 ${isFiltering ? currentPage === totalFilteredPages ? "opacity-50 cursor-not-allowed" : "" : currentPage === totalAllPages ? "opacity-50 cursor-not-allowed" : ""}`}
+                  disabled={
+                    isFiltering
+                      ? currentPage === totalFilteredPages
+                      : isSearching
+                      ? currentPage === totalSearchPages
+                      : currentPage === totalAllPages
+                  }
+                  className={`flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 ${
+                    (isFiltering && currentPage === totalFilteredPages) ||
+                    (isSearching && currentPage === totalSearchPages) ||
+                    (!isFiltering &&
+                      !isSearching &&
+                      currentPage === totalAllPages)
+                      ? "opacity-50 cursor-not-allowed"
+                      : ""
+                  }`}
                 >
                   <span className="sr-only">Next</span>
-                  <svg className="w-2.5 h-2.5 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 9 4-4-4-4" />
+                  <svg
+                    className="w-2.5 h-2.5 rtl:rotate-180"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 6 10"
+                  >
+                    <path
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="m1 9 4-4-4-4"
+                    />
                   </svg>
                 </button>
               </li>

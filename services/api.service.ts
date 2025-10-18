@@ -89,6 +89,17 @@ export async function singleProductApi(slug: string) {
         Authorization: `Bearer ${token}`,
       },
     });
+
+    if (!res.ok) {
+      let msg = `Failed to fetch product. Status: ${res.status}`;
+      try {
+        const j = await res.json();
+        if (j?.message) msg = j.message;
+        else if (j?.error) msg = j.error;
+      } catch {}
+      throw new Error(msg);
+    }
+
     return await res.json();
   } catch (err) {
     console.error("Error fetching single product:", err);

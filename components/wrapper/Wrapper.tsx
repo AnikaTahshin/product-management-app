@@ -38,7 +38,7 @@ const dispatch = useDispatch();
   if (!token) return <Login />;
 
   return (
-    <div className="flex min-h-screen h-screen overflow-y-hidden">
+    <div className="flex overflow-y-hidden">
       <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />
 
       <div className="flex-1 flex flex-col">

@@ -46,9 +46,9 @@ const Category = () => {
             <input
               type="text"
               placeholder="Search products..."
-              className="w-full h-11 pl-4 pr-12 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              className="w-full h-11 pl-4 pr-12 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-[#5A9367] focus:border-transparent transition"
             />
-            <button className="absolute right-1.5 top-1.5 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full transition">
+            <button className="absolute right-1.5 top-1.5 bg-[#5A9367] hover:bg-[#438953] text-white p-2 rounded-full transition">
               <MdSearch className="text-xl" />
             </button>
           </div>

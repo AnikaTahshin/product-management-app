@@ -20,12 +20,20 @@ const DeleteModal = ({ isOpen, onClose, singleProduct, onDeleted }: Props) => {
     try {
       setLoading(true);
 
-      const deleted = await deleteProductApi(singleProduct.id);
+      const deleted = await deleteProductApi(singleProduct?.id);
+      
+
       toast.success("Product deleted successfully!", {
         position: "top-right",
-        autoClose: 3000,
-        theme: "light",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
         transition: Bounce,
+       
       });
 
       onDeleted(deleted);
