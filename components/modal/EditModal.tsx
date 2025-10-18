@@ -177,7 +177,7 @@ toast.warn("Price must be greater than 0", {
         />
 
         <div className="flex justify-end space-x-2">
-          <button className="px-4 py-2 bg-gray-200 rounded" onClick={onClose}>
+          <button className="px-4 py-2 bg-gray-200 rounded cursor-pointer" onClick={onClose}>
             Cancel
           </button>
           <button

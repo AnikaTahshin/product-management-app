@@ -22,7 +22,7 @@ const DeleteModal = ({ isOpen, onClose, singleProduct, onDeleted }: Props) => {
 
       const deleted = await deleteProductApi(singleProduct?.id);
 
-      if (deleted) {
+      
         toast.success("Product deleted successfully!", {
           position: "top-right",
           autoClose: 5000,
@@ -35,10 +35,12 @@ const DeleteModal = ({ isOpen, onClose, singleProduct, onDeleted }: Props) => {
           transition: Bounce,
         });
 
-        onDeleted(deleted);
+        
+      
+
+      onDeleted(deleted);
 
         onClose();
-      }
     } catch (error) {
       console.error("Error deleting product:", error);
       toast.error("Failed to delete product!", {
@@ -66,14 +68,14 @@ const DeleteModal = ({ isOpen, onClose, singleProduct, onDeleted }: Props) => {
           <button
             onClick={onClose}
             disabled={loading}
-            className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
+            className="px-4 py-2 cursor-pointer bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             onClick={handleDeleteProduct}
             disabled={loading}
-            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 disabled:opacity-50"
+            className="px-4 py-2 cursor-pointer bg-red-500 text-white rounded hover:bg-red-600 disabled:opacity-50"
           >
             {loading ? "Deleting..." : "Delete"}
           </button>

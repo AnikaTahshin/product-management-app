@@ -144,13 +144,13 @@ const handleDeleteProduct = (deleted: Product) => {
                 <div className="flex gap-4 mt-6">
                   <button
                     onClick={() => setIsEdit(true)}
-                    className="flex items-center justify-center gap-2 bg-[#5A9367] text-white px-5 py-2 rounded-lg hover:bg-[#438953] transition"
+                    className="flex items-center cursor-pointer justify-center gap-2 bg-[#5A9367] text-white px-5 py-2 rounded-lg hover:bg-[#438953] transition"
                   >
                     <FaEdit /> Edit
                   </button>
                   <button
                     onClick={() => setIsDelete(true)}
-                    className="flex items-center justify-center gap-2 bg-red-600 text-white px-5 py-2 rounded-lg hover:bg-red-700 transition"
+                    className="flex items-center cursor-pointer justify-center gap-2 bg-red-600 text-white px-5 py-2 rounded-lg hover:bg-red-700 transition"
                   >
                     <FaTrashAlt /> Delete
                   </button>

@@ -2,6 +2,7 @@
 import { loginApi } from "@/services/api.service";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Bounce, toast } from "react-toastify";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -9,7 +10,12 @@ const Login = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    await loginApi(email);
+    const res = await loginApi(email);
+
+    if (res) {
+    toast.success("Login successfully!", { transition: Bounce });
+      
+    }
   };
 
 useEffect(() => {
@@ -43,14 +49,14 @@ useEffect(() => {
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   autoComplete="email"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-[#438953] sm:text-sm/6"
                 />
               </div>
             </div>
             <div>
               <button
                 type="submit"
-                className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                className="flex cursor-pointer w-full justify-center rounded-md bg-[#5A9367] px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-[#438953] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#438953]"
               >
                 Sign in
               </button>

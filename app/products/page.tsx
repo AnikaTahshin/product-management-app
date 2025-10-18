@@ -33,6 +33,7 @@ const Products = () => {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [isLoading, setIsLoading] = useState(false)
 
   // from page details returned deleted product id
   const getAllProductsLength = async () => {
@@ -42,7 +43,12 @@ const Products = () => {
 
   const fetchAllProducts = async (currentOffset = offset) => {
     const res = await productsApi(currentOffset, limit);
+    if (res) {
+      setIsLoading
     setProducts(res);
+
+    }
+    else return
   };
 
   const isFiltering = filteredProducts.length > 0;
@@ -251,12 +257,36 @@ const Products = () => {
     }
   }, [searchParams, limit, router]);
 
+  // useEffect(() => {
+  //   getAllProductsLength();
+  // }, []);
+  // useEffect(() => {
+  //   fetchAllProducts();
+  // }, [offset]);
+
   useEffect(() => {
-    getAllProductsLength();
-  }, []);
-  useEffect(() => {
-    fetchAllProducts();
-  }, [offset]);
+  const fetchData = async () => {
+    const page = parseInt(searchParams.get("page") || "1");
+    const deleted = searchParams.get("deleted");
+    const initialOffset = (page - 1) * limit;
+    setOffset(initialOffset);
+
+    // Fetch only once
+    await fetchAllProducts(initialOffset);
+
+    if (deleted === "true") {
+      await getAllProductsLength();
+      router.replace("/products" + (page > 1 ? `?page=${page}` : ""), {
+        scroll: false,
+      });
+    } else {
+      await getAllProductsLength();
+    }
+  };
+
+  fetchData();
+}, [searchParams, limit, router]);
+
 
   useEffect(() => {
     if (!searchText && isSearching) setIsSearching(false);
@@ -284,7 +314,7 @@ const Products = () => {
         onUpdated={handleAddProduct}
       />
 
-      {!displayedProducts.length ? (
+      {!displayedProducts.length || isLoading ? (
         <Loader />
       ) : (
         <div className="flex flex-col items-center justify-center p-6 w-full">
@@ -295,7 +325,7 @@ const Products = () => {
           <div className="flex flex-col md:flex-row justify-between items-center w-full max-w-4xl mb-6">
             <button
               onClick={() => setIsAdd(true)}
-              className="flex items-center mb-2 md:mb-0 gap-2 bg-[#5A9367] hover:bg-[#438953] text-white font-semibold px-4 py-2 rounded-lg shadow transition-all"
+              className="flex cursor-pointer items-center mb-2 md:mb-0 gap-2 bg-[#5A9367] hover:bg-[#438953] text-white font-semibold px-4 py-2 rounded-lg shadow transition-all"
             >
               + Add Product
             </button>
@@ -313,7 +343,7 @@ const Products = () => {
               />
               <button
                 onClick={handleSearch}
-                className="absolute right-1.5 top-1.5 bg-[#5A9367] hover:bg-[#438953] text-white p-2 rounded-full transition"
+                className="absolute cursor-pointer right-1.5 top-1.5 bg-[#5A9367] hover:bg-[#438953] text-white p-2 rounded-full transition"
               >
                 <MdSearch className="text-xl" />
               </button>
@@ -417,7 +447,7 @@ const Products = () => {
                 <button
                   onClick={handlePrev}
                   disabled={currentPage === 1}
-                  className={`flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 ${
+                  className={`flex cursor-pointer items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 ${
                     currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                 >
@@ -444,7 +474,7 @@ const Products = () => {
                 <li key={pageNum}>
                   <button
                     onClick={() => handlePage(pageNum)}
-                    className={`flex items-center justify-center px-3 h-8 leading-tight border ${
+                    className={`flex cursor-pointer items-center justify-center px-3 h-8 leading-tight border ${
                       currentPage === pageNum
                         ? "text-white border-[#5A9367] bg-[#5A9367] hover:bg-[#5A9367] hover:text-white"
                         : "text-gray-500 bg-white border-gray-300 hover:bg-gray-100 hover:text-gray-700"
@@ -465,7 +495,7 @@ const Products = () => {
                       ? currentPage === totalSearchPages
                       : currentPage === totalAllPages
                   }
-                  className={`flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 ${
+                  className={`flex cursor-pointer items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 ${
                     (isFiltering && currentPage === totalFilteredPages) ||
                     (isSearching && currentPage === totalSearchPages) ||
                     (!isFiltering &&

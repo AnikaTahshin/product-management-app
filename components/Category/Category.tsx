@@ -110,7 +110,7 @@ const Category = () => {
               />
               <button
                 onClick={handleSearch}
-                className="absolute right-1.5 top-1.5 bg-[#5A9367] hover:bg-[#438953] text-white p-2 rounded-full transition"
+                className="absolute right-1.5 cursor-pointer top-1.5 bg-[#5A9367] hover:bg-[#438953] text-white p-2 rounded-full transition"
               >
                 <MdSearch className="text-xl" />
               </button>
@@ -182,7 +182,7 @@ const Category = () => {
                   <button
                     onClick={handlePrev}
                     disabled={currentPage === 1}
-                    className={`px-3 py-1 border rounded-md ${
+                    className={`px-3 py-1 border rounded-md cursor-pointer ${
                       currentPage === 1
                         ? "opacity-50 cursor-not-allowed"
                         : "hover:bg-gray-100"
@@ -196,7 +196,7 @@ const Category = () => {
                   <li key={pageNum}>
                     <button
                       onClick={() => handlePage(pageNum + 1)}
-                      className={`px-3 py-1 border rounded-md ${
+                      className={`px-3 py-1 border rounded-md cursor-pointer ${
                         currentPage === pageNum + 1
                           ? "bg-[#5A9367] text-white"
                           : "hover:bg-gray-100"
@@ -211,7 +211,7 @@ const Category = () => {
                   <button
                     onClick={handleNext}
                     disabled={currentPage === totalPages}
-                    className={`px-3 py-1 border rounded-md ${
+                    className={`px-3 py-1 border rounded-md cursor-pointer ${
                       currentPage === totalPages
                         ? "opacity-50 cursor-not-allowed"
                         : "hover:bg-gray-100"
