@@ -241,3 +241,28 @@ export async function searchProductsApi(searchedText: string) {
     throw err;
   }
 }
+
+export async function searchCategoryApi(searchedText: string) {
+  try {
+    const token = store.getState().auth.token;
+    const url = `https://api.bitechx.com/categories/search?searchedText=${encodeURIComponent(searchedText)}`
+    //const url = `https://api.bitechx.com/products/search?searchedText=${encodeURIComponent(searchedText)}`;
+    const res = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Request failed (${res.status}): ${text}`);
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error("Error in searchProductsApi:", err);
+    throw err;
+  }
+}

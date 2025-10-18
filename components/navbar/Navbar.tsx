@@ -56,7 +56,7 @@ const Navbar = ({ setIsOpen }: any) => {
         
            <button
                   onClick={handleLogout}
-                  className="text-md hover:text-[#006dca] transition-colors duration-300 flex items-center gap-2"
+                  className="text-md hover:text-[#438953] transition-colors duration-300 flex items-center gap-2"
                 >
                   <MdLogout />
                   Logout

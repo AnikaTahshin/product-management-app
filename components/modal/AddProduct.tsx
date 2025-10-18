@@ -1,3 +1,5 @@
+"use client";
+
 import { AddProductApi, categoryIdApi } from "@/services/api.service";
 import React, { useEffect, useState } from "react";
 import { Bounce, toast } from "react-toastify";
@@ -13,60 +15,94 @@ const AddProduct = ({ isOpen, onClose, onUpdated }: Props) => {
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState("");
-  const [categoryId, setCategoryId] = useState("");
+  const [categoryId, setCategoryId] = useState(""); 
   const [categories, setCategories] = useState<any[]>([]);
 
-  // Fetch categories on mount
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const res = await categoryIdApi();
         setCategories(res);
-
-        // Auto-select the first category if available
-        if (res.length > 0) {
-          setCategoryId(res[0].id);
-        }
       } catch (err) {
         console.error("Failed to fetch categories:", err);
       }
     };
-
     fetchCategories();
   }, []);
 
   const handleAdd = async () => {
-    if (!name || !description || !price || !categoryId) {
-      toast.error("Please fill all fields correctly!", { transition: Bounce });
-      return;
-    }
+  // Name validation
+  if (!name.trim()) {
+    toast.warn("Product name is required!", {
+      position: "top-right",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+      transition: Bounce,
+    });
+    return;
+  }
 
-    const data = {
-      name,
-      description,
-      images: [image || "https://laravelpoint.com/files/p_img.jpg"], // placeholder image
-      price: Number(price),
-      categoryId,
-    };
+  // Price validation
+  const numericPrice = Number(price);
+  if (price.trim() === "") {
+    toast.warn("Price is required!", { transition: Bounce });
+    return;
+  } else if (isNaN(numericPrice)) {
+    toast.warn("Price must be a valid number!", { transition: Bounce });
+    return;
+  } else if (numericPrice <= 0) {
+    toast.warn("Price must be greater than 0!", { transition: Bounce });
+    return;
+  }
 
+  // Description validation
+  if (!description.trim()) {
+    toast.error("Product description is required!", { transition: Bounce });
+    return;
+  }
 
-    try {
-      const added = await AddProductApi(data);
+  // Category validation
+  if (!categoryId) {
+    toast.error("Please select a category!", { transition: Bounce });
+    return;
+  }
 
-      toast.success("Product added successfully!", { transition: Bounce });
-      onUpdated(added);
-      setName("");
-      setPrice("");
-      setDescription("");
-      setImage("");
-      setCategoryId("");
+  // Image validation
+  if (!image.trim()) {
+    toast.warn("Please provide an image URL!", { transition: Bounce });
+    return;
+  }
 
-      onClose();
-    } catch (err) {
-      console.error("Failed to add product:", err);
-      toast.error("Failed to add product", { transition: Bounce });
-    }
+  const data = {
+    name: name.trim(),
+    description: description.trim(),
+    images: [image.trim()],
+    price: numericPrice,
+    categoryId,
   };
+
+  try {
+    const added = await AddProductApi(data);
+    toast.success("Product added successfully!", { transition: Bounce });
+    onUpdated(added);
+
+    setName("");
+    setPrice("");
+    setDescription("");
+    setImage("");
+    setCategoryId("");
+    onClose();
+  } catch (err) {
+    console.error("Failed to add product:", err);
+    toast.error("Failed to add product!", { transition: Bounce });
+  }
+};
+
 
   const handleClose = () => {
     setName("");
@@ -76,13 +112,14 @@ const AddProduct = ({ isOpen, onClose, onUpdated }: Props) => {
     setCategoryId("");
     onClose();
   };
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div
         className="fixed inset-0 bg-black opacity-50"
-        onClick={onClose}
+        onClick={handleClose}
       ></div>
       <div className="bg-white p-6 rounded-lg z-50 relative w-96">
         <h2 className="text-xl font-bold mb-4">Add Product</h2>

@@ -21,24 +21,24 @@ const DeleteModal = ({ isOpen, onClose, singleProduct, onDeleted }: Props) => {
       setLoading(true);
 
       const deleted = await deleteProductApi(singleProduct?.id);
-      
 
-      toast.success("Product deleted successfully!", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-        transition: Bounce,
-       
-      });
+      if (deleted) {
+        toast.success("Product deleted successfully!", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+          transition: Bounce,
+        });
 
-      onDeleted(deleted);
+        onDeleted(deleted);
 
-      onClose();
+        onClose();
+      }
     } catch (error) {
       console.error("Error deleting product:", error);
       toast.error("Failed to delete product!", {
@@ -58,7 +58,7 @@ const DeleteModal = ({ isOpen, onClose, singleProduct, onDeleted }: Props) => {
         className="fixed inset-0 bg-black opacity-50"
         onClick={onClose}
       ></div>
-      <div className="bg-white p-6 rounded-lg z-50 relative w-96">
+      <div className="bg-white p-6 rounded-lg z-50 relative w-80 md:w-96">
         <h2 className="text-xl font-bold mb-4">Delete Product</h2>
         <p>Are you sure you want to delete this product?</p>
 

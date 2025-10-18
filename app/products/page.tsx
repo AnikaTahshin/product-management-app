@@ -34,6 +34,7 @@ const Products = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [searchText, setSearchText] = useState("");
 
+  // from page details returned deleted product id
   const getAllProductsLength = async () => {
     const res = await productsApiLength();
     setAllProducts(res);
@@ -62,76 +63,71 @@ const Products = () => {
     ? Math.floor(offset / limit) + 1
     : Math.floor(offset / limit) + 1;
 
-  // Update URL when page changes
   const updateURL = (page: number) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("page", page.toString());
     router.replace(`/products?${params.toString()}`, { scroll: false });
   };
 
-  // Pagination handlers
   const handlePage = (page: number) => {
-  if (isFiltering) {
-    setFilteredOffset((page - 1) * limit);
-  } else if (isSearching) {
-    setOffset((page - 1) * limit);
-  } else {
-    setOffset((page - 1) * limit);
-  }
-  updateURL(page);
+    if (isFiltering) {
+      setFilteredOffset((page - 1) * limit);
+    } else if (isSearching) {
+      setOffset((page - 1) * limit);
+    } else {
+      setOffset((page - 1) * limit);
+    }
+    updateURL(page);
 
-  // ✅ Scroll to top
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth",
-  });
-};
-
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
 
   const handleNext = () => {
-  if (isFiltering) {
-    if (filteredOffset + limit < filteredProducts.length) {
-      setFilteredOffset(filteredOffset + limit);
-      updateURL(currentPage + 1);
-      window.scrollTo({ top: 0, behavior: "smooth" }); // ✅
+    if (isFiltering) {
+      if (filteredOffset + limit < filteredProducts.length) {
+        setFilteredOffset(filteredOffset + limit);
+        updateURL(currentPage + 1);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    } else if (isSearching) {
+      if (currentPage < totalSearchPages) {
+        setOffset(offset + limit);
+        updateURL(currentPage + 1);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    } else {
+      if (currentPage < totalAllPages) {
+        setOffset(offset + limit);
+        updateURL(currentPage + 1);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
     }
-  } else if (isSearching) {
-    if (currentPage < totalSearchPages) {
-      setOffset(offset + limit);
-      updateURL(currentPage + 1);
-      window.scrollTo({ top: 0, behavior: "smooth" }); // ✅
-    }
-  } else {
-    if (currentPage < totalAllPages) {
-      setOffset(offset + limit);
-      updateURL(currentPage + 1);
-      window.scrollTo({ top: 0, behavior: "smooth" }); // ✅
-    }
-  }
-};
+  };
 
-const handlePrev = () => {
-  if (isFiltering) {
-    if (filteredOffset > 0) {
-      setFilteredOffset(filteredOffset - limit);
-      updateURL(currentPage - 1);
-      window.scrollTo({ top: 0, behavior: "smooth" }); // ✅
+  const handlePrev = () => {
+    if (isFiltering) {
+      if (filteredOffset > 0) {
+        setFilteredOffset(filteredOffset - limit);
+        updateURL(currentPage - 1);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    } else if (isSearching) {
+      if (currentPage > 1) {
+        setOffset(offset - limit);
+        updateURL(currentPage - 1);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    } else {
+      if (currentPage > 1) {
+        setOffset(offset - limit);
+        updateURL(currentPage - 1);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
     }
-  } else if (isSearching) {
-    if (currentPage > 1) {
-      setOffset(offset - limit);
-      updateURL(currentPage - 1);
-      window.scrollTo({ top: 0, behavior: "smooth" }); 
-    }
-  } else {
-    if (currentPage > 1) {
-      setOffset(offset - limit);
-      updateURL(currentPage - 1);
-      window.scrollTo({ top: 0, behavior: "smooth" }); 
-    }
-  }
-};
-
+  };
 
   const getPageNumbers = () => {
     const maxPagesToShow = 5;
@@ -204,12 +200,24 @@ const handlePrev = () => {
 
   const handleAddProduct = (newProduct: any) => {
     if (!newProduct) return;
+
     setProducts((prev) => [newProduct, ...prev]);
-    setFilteredProducts((prev) => [newProduct, ...prev]);
+
+    if (filteredProducts.length > 0) {
+      setFilteredProducts((prev) => [newProduct, ...prev]);
+    }
+
+    if (isSearching && searchText.trim() !== "") {
+      if (newProduct.name.toLowerCase().includes(searchText.toLowerCase())) {
+        setSearchResults((prev) => [newProduct, ...prev]);
+      }
+    }
+
+    setOffset(0);
+    setFilteredOffset(0);
+
     setIsAdd(false);
   };
-
-  
 
   const handleSearch = async () => {
     const text = searchText.trim();
@@ -228,23 +236,18 @@ const handlePrev = () => {
     router.replace("/products", { scroll: false });
   };
 
-  const totalItemCount = isSearching
-    ? searchResults.length
-    : allProducts.length;
-
-  // Initialize from URL params
   useEffect(() => {
     const page = parseInt(searchParams.get("page") || "1");
     const deleted = searchParams.get("deleted");
     const initialOffset = (page - 1) * limit;
     setOffset(initialOffset);
-    fetchAllProducts(initialOffset); // Fetch with correct offset immediately
-    
-    // If coming from delete, refetch all data
+    fetchAllProducts(initialOffset);
+
     if (deleted === "true") {
       getAllProductsLength();
-      // Clean up the URL parameter
-      router.replace("/products" + (page > 1 ? `?page=${page}` : ""), { scroll: false });
+      router.replace("/products" + (page > 1 ? `?page=${page}` : ""), {
+        scroll: false,
+      });
     }
   }, [searchParams, limit, router]);
 
@@ -255,8 +258,11 @@ const handlePrev = () => {
     fetchAllProducts();
   }, [offset]);
 
-  !searchText && isSearching && setIsSearching(false);
+  useEffect(() => {
+    if (!searchText && isSearching) setIsSearching(false);
+  }, [searchText, isSearching]);
 
+  console.log("see searchResults",searchResults)
 
   return (
     <>
@@ -289,7 +295,7 @@ const handlePrev = () => {
           <div className="flex flex-col md:flex-row justify-between items-center w-full max-w-4xl mb-6">
             <button
               onClick={() => setIsAdd(true)}
-              className="flex items-center gap-2 bg-[#5A9367] hover:bg-[#438953] text-white font-semibold px-4 py-2 rounded-lg shadow transition-all"
+              className="flex items-center mb-2 md:mb-0 gap-2 bg-[#5A9367] hover:bg-[#438953] text-white font-semibold px-4 py-2 rounded-lg shadow transition-all"
             >
               + Add Product
             </button>
@@ -336,19 +342,23 @@ const handlePrev = () => {
                 </tr>
               </thead>
               <tbody>
-                {displayedProducts.length === 0 ? (
+                {isSearching && searchResults?.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="text-center py-4">
-                      No products found
+                    <td colSpan={7} className="text-center py-4 text-gray-500">
+                      No matching products found
+                    </td>
+                  </tr>
+                ) : displayedProducts?.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="text-center py-4 text-gray-500">
+                      Loading products...
                     </td>
                   </tr>
                 ) : (
-                  displayedProducts?.map((product, index) => (
+                  displayedProducts.map((product, index) => (
                     <tr
                       key={product.id}
-                      onClick={() => {
-                        router.push(`/products/${product.slug}`);
-                      }}
+                      onClick={() => router.push(`/products/${product?.slug}`)}
                       className="hover:bg-slate-50 cursor-pointer"
                     >
                       <td className="p-4 border-b border-slate-200">
@@ -360,39 +370,39 @@ const handlePrev = () => {
                       <td className="p-4 border-b border-slate-200">
                         {product.images && product.images.length > 0 && (
                           <img
-                            src={product.images[0]}
-                            alt={product.name}
+                            src={product?.images[0]}
+                            alt={product?.name}
                             className="w-16 h-16 object-cover rounded"
                           />
                         )}
                       </td>
                       <td className="p-4 border-b border-slate-200">
-                        BDT. {product.price}
+                        BDT. {product?.price}
                       </td>
                       <td className="p-4 border-b border-slate-200">
-                        {product.category?.name}
+                        {product?.category?.name}
                       </td>
-                       <td className="p-4 border-b border-slate-200">
-                         {product.description}
-                       </td>
-                       <td className="p-4 border-b border-slate-200 flex flex-row gap-2">
-                         <FaRegEdit 
-                           onClick={(e) => {
-                             e.stopPropagation();
-                             handleEdit(product.slug);
-                           }} 
-                           className="cursor-pointer hover:text-[#5A9367]" 
-                           size={25} 
-                         />
-                         <MdDeleteOutline 
-                           onClick={(e) => {
-                             e.stopPropagation();
-                             handleDelete(product.slug);
-                           }} 
-                           className="cursor-pointer hover:text-[#5A9367]" 
-                           size={25} 
-                         />
-                       </td>
+                      <td className="p-4 border-b border-slate-200">
+                        {product?.description}
+                      </td>
+                      <td className="p-4 border-b border-slate-200 flex flex-row items-center justify-between mt-10 gap-2">
+                        <FaRegEdit
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEdit(product.slug);
+                          }}
+                          className="cursor-pointer hover:text-[#5A9367]"
+                          size={25}
+                        />
+                        <MdDeleteOutline
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(product?.slug);
+                          }}
+                          className="cursor-pointer hover:text-[#5A9367]"
+                          size={25}
+                        />
+                      </td>
                     </tr>
                   ))
                 )}

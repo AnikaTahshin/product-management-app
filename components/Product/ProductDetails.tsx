@@ -35,7 +35,6 @@ const ProductDetails = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [isDelete, setIsDelete] = useState(false);
 
-  // Fetch product by slug
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -43,7 +42,6 @@ const ProductDetails = () => {
         if (res) setDetails(res);
       } catch (error: any) {
         console.error("Error fetching product details:", error);
-        // If slug is invalid, redirect to products page
         if (error?.message?.includes("Invalid product slug")) {
           router.push("/products");
         }
@@ -55,26 +53,23 @@ const ProductDetails = () => {
   }, [slug, router]);
 
 
-  // Handle product deletion callback from modal
-  const handleDeleteProduct = (deleted: any) => {
-    // Modal already shows toast and handles the API call
-    // Redirect to products page with a flag to indicate delete happened
-    router.push("/products?deleted=true");
-  };
+const handleDeleteProduct = (deleted: Product) => {
+  if (!deleted) return;
+
+  router.push("/products");
+};
+
 
   const handleUpdateProduct = async (updated: Product) => {
-    // refetch from backend
     const res = await singleProductApi(updated?.slug);
     setDetails(res);
     setIsEdit(false);
     
-    // Update URL if slug changed
     if (updated?.slug && updated.slug !== slug) {
       router.replace(`/products/${updated.slug}`);
     }
   };
 
-  // Format timestamps
   const formattedCreatedAt = details ? new Date(details.createdAt).toLocaleString() : "";
   const formattedUpdatedAt = details ? new Date(details.updatedAt).toLocaleString() : "";
 
@@ -120,7 +115,7 @@ const ProductDetails = () => {
                   <p className="text-gray-600 mb-4">{details?.description}</p>
 
                   <p className="text-lg font-semibold text-gray-800 mb-2">
-                    💰 Price: <span className="text-[#5A9367]">BDT {details?.price}</span>
+                    Price: <span className="text-[#5A9367]">BDT {details?.price}</span>
                   </p>
 
                   <p className="text-sm text-gray-500 mb-1">

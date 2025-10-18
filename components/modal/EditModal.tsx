@@ -30,14 +30,17 @@ interface Props {
 //   updatedAt: string;
 //   category?: Category;
 // }
-const EditModal = ({ isOpen, onClose, singleProduct, onUpdated }: Props ) => {
+const EditModal = ({ isOpen, onClose, singleProduct, onUpdated }: Props) => {
   const [name, setName] = useState(singleProduct?.name || "");
-  const [price, setPrice] = useState<string>((singleProduct?.price ?? "").toString());
+  const [price, setPrice] = useState<string>(
+    (singleProduct?.price ?? "").toString()
+  );
   const [description, setDescription] = useState(
     singleProduct?.description || ""
   );
-  const [productId, setProductId] = useState<string | null>(singleProduct?.id || null);
-
+  const [productId, setProductId] = useState<string | null>(
+    singleProduct?.id || null
+  );
 
   useEffect(() => {
     if (singleProduct) {
@@ -47,7 +50,6 @@ const EditModal = ({ isOpen, onClose, singleProduct, onUpdated }: Props ) => {
       setDescription(singleProduct?.description);
     }
   }, [singleProduct]);
-  // console.log("deails page id",productId)
 
   const handleUpdate = async () => {
     if (!productId) {
@@ -55,7 +57,7 @@ const EditModal = ({ isOpen, onClose, singleProduct, onUpdated }: Props ) => {
       return;
     }
     if (name === "" || name === undefined) {
-      toast("Please type everything!", {
+      toast.warn("Name is empty", {
         position: "top-right",
         autoClose: 5000,
         hideProgressBar: false,
@@ -63,14 +65,14 @@ const EditModal = ({ isOpen, onClose, singleProduct, onUpdated }: Props ) => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        theme: "light",
+        theme: "colored",
         transition: Bounce,
       });
       return;
     }
 
-    if (price.trim() === "" || isNaN(Number(price)) || Number(price) <= 0) {
-      toast("Please enter correct value!", {
+    if (price.trim() === "" || isNaN(Number(price))) {
+      toast.warn("Price is empty", {
         position: "top-right",
         autoClose: 5000,
         hideProgressBar: false,
@@ -78,7 +80,22 @@ const EditModal = ({ isOpen, onClose, singleProduct, onUpdated }: Props ) => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        theme: "light",
+        theme: "colored",
+        transition: Bounce,
+      });
+
+      return;
+    }
+    else if(Number(price) <= 0){
+toast.warn("Price must be greater than 0", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
         transition: Bounce,
       });
 
@@ -86,7 +103,7 @@ const EditModal = ({ isOpen, onClose, singleProduct, onUpdated }: Props ) => {
     }
 
     if (description === "" || description === undefined) {
-      toast("Please type everything!", {
+     toast.warn("Description is empty", {
         position: "top-right",
         autoClose: 5000,
         hideProgressBar: false,
@@ -94,7 +111,7 @@ const EditModal = ({ isOpen, onClose, singleProduct, onUpdated }: Props ) => {
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        theme: "light",
+        theme: "colored",
         transition: Bounce,
       });
       return;
@@ -134,13 +151,13 @@ const EditModal = ({ isOpen, onClose, singleProduct, onUpdated }: Props ) => {
         className="fixed inset-0 bg-black opacity-50"
         onClick={onClose}
       ></div>
-      <div className="bg-white p-6 rounded-lg z-50 relative w-96">
+      <div className="bg-white p-6 rounded-lg z-50 relative w-80 md:w-96">
         <h2 className="text-xl font-bold mb-4">Edit Product</h2>
 
         <input
           className="w-full mb-3 p-2 border rounded"
           placeholder="Name"
-          value={name ?? ""} 
+          value={name ?? ""}
           onChange={(e) => setName(e.target.value)}
         />
 
@@ -164,7 +181,7 @@ const EditModal = ({ isOpen, onClose, singleProduct, onUpdated }: Props ) => {
             Cancel
           </button>
           <button
-            className="px-4 py-2 bg-[#5A9367] text-white rounded"
+            className="px-4 py-2 bg-[#5A9367] hover:bg-[#438953] cursor-pointer text-white rounded"
             onClick={handleUpdate}
           >
             Update

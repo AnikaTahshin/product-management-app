@@ -44,7 +44,7 @@ const FilterProduct = ({
         value={categoryId}
         onChange={(e) => handleFilter(e.target.value)}
       >
-        <option value="">Filter by category</option>
+        <option value="" disabled>Filter by category</option>
         {categories.map((cat) => (
           <option key={cat.id} value={cat.id}>
             {cat.name}
